@@ -12,7 +12,7 @@ api.patch(
   [md_auth.ensureAuth, md_upload],
   UserController.updateMe
 );
-api.get("/users", [md_auth.ensureAuth], UserController.getUsers);
+api.get("/users", UserController.getUsers);
 api.post("/user", [md_auth.ensureAuth, md_upload], UserController.createUser);
 api.get("/get-user/:id", [md_auth.ensureAuth], UserController.getUser);
 api.patch(
