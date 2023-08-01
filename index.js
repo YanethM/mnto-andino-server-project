@@ -9,7 +9,7 @@ const {
   IP_SERVER,
 } = require("./constants");
 
-const PORT = 3200;
+const PORT = process.env.PORT || 3977;
 
 
 console.log(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}`);
