@@ -4,19 +4,11 @@ const image = require("../utils/image");
 // Método para crear una nueva categoría
 const crearCategoria = async (req, res) => {
   try {
-    const { nombre, descripcion, foto } = req.body;
+    const { nombre, active } = req.body;
     const nuevaCategoria = new Category({
       nombre,
-      descripcion,
-      foto,
       active: true,
     });
-
-    if (req.files.foto) {
-      const imagePath = image.getFilePath(req.files.foto);
-      nuevaCategoria.foto = imagePath;
-    }
-
     const categoriaGuardada = await nuevaCategoria.save();
     console.log(categoriaGuardada);
     res.status(201).json(categoriaGuardada);
@@ -30,15 +22,11 @@ const crearCategoria = async (req, res) => {
 const editarCategoria = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, descripcion, foto } = req.body;
-    let imagePath = null;
-    if (req.files.foto) {
-      const imagePath = image.getFilePath(req.files.foto);
-      nuevaCategoria.foto = imagePath;
-    }
+    const { nombre, active } = req.body;
+ 
     const categoriaEditada = await Category.findByIdAndUpdate(
       id,
-      { nombre, descripcion, foto, active },
+      { nombre, active },
       { new: true }
     );
     if (!categoriaEditada) {

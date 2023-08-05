@@ -8,7 +8,7 @@ const app = express();
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 const sedeRoutes = require("./routes/sede");
-const menuRoutes = require("./routes/menu");
+const addressRoutes = require("./routes/address");
 const categoryRoutes = require("./routes/category");
 const postRoutes = require("./routes/post");
 
@@ -32,8 +32,8 @@ app.use(cors());
 
 app.use(`/api/${API_VERSION}/auth`, authRoutes);
 app.use(`/api/${API_VERSION}`, userRoutes);
+app.use(`/api/${API_VERSION}/addresses`, addressRoutes);
 app.use(`/api/${API_VERSION}/sedes`, sedeRoutes);
-app.use(`/api/${API_VERSION}/admin/menu`, menuRoutes);
 app.use(`/api/${API_VERSION}/admin/posts`, postRoutes);
 app.use(`/api/${API_VERSION}/admin/categories`, categoryRoutes);
 

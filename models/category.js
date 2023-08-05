@@ -7,15 +7,10 @@ const CategorySchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  descripcion: {
-    type: String,
-    required: true,
-  },
-  foto: String,
-  active: Boolean,
+  active: { type: Boolean, required: true },
   created_at: { type: Date, default: Date.now },
 });
 
 CategorySchema.plugin(mongoosePaginate);
-const Category = mongoose.model("Categoria", CategorySchema);
+const Category = mongoose.model("Category", CategorySchema);
 module.exports = Category;

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate");
 
-const NoticiaSchema = mongoose.Schema({
+const PostSchema = mongoose.Schema({
   titulo: {
     type: String,
     required: true,
@@ -10,6 +10,10 @@ const NoticiaSchema = mongoose.Schema({
     type: String,
   },
   descripcion: {
+    type: String,
+    required: true,
+  },
+  creador: {
     type: String,
     required: true,
   },
@@ -24,21 +28,18 @@ const NoticiaSchema = mongoose.Schema({
       },
     },
   ],
-  creador: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
   fecha_creacion: {
     type: Date,
     default: Date.now,
   },
-  categoria: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Categoria",
-  },
+  categorias: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+    },
+  ],
 });
 
-NoticiaSchema.plugin(mongoosePaginate);
+PostSchema.plugin(mongoosePaginate);
 
-module.exports = mongoose.model("Noticia", NoticiaSchema);
+module.exports = mongoose.model("Post", PostSchema);

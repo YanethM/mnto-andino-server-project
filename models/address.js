@@ -21,24 +21,6 @@ const AddressSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  numero2: {
-    type: String,
-  },
-  numero3: {
-    type: String,
-  },
-  selectedLetter1: {
-    type: String,
-  },
-  selectedLetter2: {
-    type: String,
-  },
-  selectedLetter3: {
-    type: String,
-  },
-  selectedZone: {
-    type: String,
-  },
   barrio: {
     type: String,
   },

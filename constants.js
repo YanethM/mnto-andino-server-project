@@ -4,7 +4,7 @@ const DB_PASSWORD = "prueba2";
 const DB_NAME = "prueba_db";
 
 const API_VERSION = "v1";
-const IP_SERVER = "192.168.1.12";
+const IP_SERVER = "localhost";
 const JWT_SECRET_KEY = "acceso-sistema-2023";
 
 module.exports = {

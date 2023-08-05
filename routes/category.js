@@ -3,13 +3,12 @@ const CategoryController = require("../controllers/category");
 const multiparty = require("connect-multiparty");
 const md_auth = require("../middlewares/authenticated");
 
-const md_upload = multiparty({ uploadDir: "./uploads/categories" });
 const api = express.Router();
 
 // Ruta para crear una nueva categoría
 api.post(
   "/new-category",
-  [md_auth.ensureAuth, md_upload],
+  [md_auth.ensureAuth],
   CategoryController.crearCategoria
 );
 
@@ -22,7 +21,7 @@ api.get("/:idCategory",CategoryController.obtenerCategoriaPorId);
 // Ruta para actualizar una categoría por su ID
 api.put(
   "/edit/:idCategory",
-  [md_auth.ensureAuth, md_upload],
+  [md_auth.ensureAuth],
   CategoryController.editarCategoria
 );
 

@@ -11,11 +11,9 @@ const SedeSchema = mongoose.Schema({
   },
   telefono_contacto: {
     type: String,
-    required: true,
   },
   email_contacto: {
     type: String,
-    required: true,
   },
   direccion: {
     type: mongoose.Schema.Types.ObjectId,

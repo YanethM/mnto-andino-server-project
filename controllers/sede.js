@@ -5,60 +5,24 @@ const session = mongoose.startSession();
 
 const createSede = async (req, res) => {
   console.log("Request: Crear sede");
-  let session;
   try {
-    session = await mongoose.startSession();
-    session.startTransaction();
-
     const {
       nombre,
       nombre_contacto,
       telefono_contacto,
       email_contacto,
-      direccion: {
-        country,
-        departamento,
-        municipio,
-        selectedStreet,
-        numero1,
-        numero2,
-        numero3,
-        selectedLetter1,
-        selectedLetter2,
-        selectedLetter3,
-        selectedZone,
-        barrio,
-        complementoDireccion,
-        nombreEdificio,
-        caracteristicasAdicionales,
-        numeroLocal,
-      },
+      direccion,
     } = req.body;
 
-    const newAddress = new Address({
-      country,
-      departamento,
-      municipio,
-      selectedStreet,
-      numero1,
-      numero2,
-      numero3,
-      selectedLetter1,
-      selectedLetter2,
-      selectedLetter3,
-      selectedZone,
-      barrio,
-      complementoDireccion,
-      nombreEdificio,
-      caracteristicasAdicionales,
-      numeroLocal,
-    });
+    // Crear la dirección primero
+    const newAddress = new Address(direccion);
+    const addressSaved = await newAddress.save();
 
-    const addressSaved = await newAddress.save({ session });
     if (!addressSaved) {
       throw new Error("No se ha podido guardar la dirección.");
     }
 
+    // Crear la sede con el _id de la dirección creada
     const sede = new Sede({
       nombre,
       nombre_contacto,
@@ -67,28 +31,21 @@ const createSede = async (req, res) => {
       direccion: addressSaved._id,
     });
 
-    const sedeStored = await sede.save({ session });
+    const sedeStored = await sede.save();
     if (!sedeStored) {
       throw new Error("No se ha podido guardar la sede.");
     }
-
-    await session.commitTransaction();
 
     res.status(200).send({
       sede: sedeStored,
     });
   } catch (err) {
     console.error(err);
-    await session.abortTransaction();
-
     res.status(500).send({
       message: "Error en el servidor.",
     });
-  } finally {
-    session.endSession();
   }
 };
-
 const getAllSedes = async (req, res) => {
   try {
     const sedes = await Sede.find().populate("direccion");
@@ -152,7 +109,6 @@ const getSede = async (req, res) => {
   }
 };
 
-
 const searchSedes = async (req, res) => {
   try {
     const { nombre, departamento, municipio } = req.params;
@@ -206,16 +162,13 @@ const updateSede = async (req, res) => {
     const {
       nombre,
       nombre_contacto,
-      telefono_contacto,
-      email_contacto,
       direccion,
     } = req.body;
 
+    // Aquí, asegúrate de que direccion sea un objeto que contenga todas las propiedades requeridas
     const updatedFields = {
       nombre,
       nombre_contacto,
-      telefono_contacto,
-      email_contacto,
       direccion: {
         ...direccion,
       },
