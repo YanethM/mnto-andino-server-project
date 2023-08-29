@@ -1,5 +1,5 @@
 const Category = require("../models/category");
-const image = require("../utils/image");
+const Post = require("../models/post");
 
 // Método para crear una nueva categoría
 const crearCategoria = async (req, res) => {
@@ -7,7 +7,7 @@ const crearCategoria = async (req, res) => {
     const { nombre, active } = req.body;
     const nuevaCategoria = new Category({
       nombre,
-      active: true,
+      active,
     });
     const categoriaGuardada = await nuevaCategoria.save();
     console.log(categoriaGuardada);
@@ -20,22 +20,17 @@ const crearCategoria = async (req, res) => {
 
 // Método para editar una categoría existente
 const editarCategoria = async (req, res) => {
+  console.log("Editar categoría", req.params);
+  const { idCategory } = req.params;
+  const categoryData = req.body;
+  console.log(`id: ${idCategory}`);
+  console.log("Datos de la categoría a actualizar:", categoryData);
   try {
-    const { id } = req.params;
-    const { nombre, active } = req.body;
- 
-    const categoriaEditada = await Category.findByIdAndUpdate(
-      id,
-      { nombre, active },
-      { new: true }
-    );
-    if (!categoriaEditada) {
-      return res.status(404).json({ mensaje: "Categoría no encontrada" });
-    }
-    res.status(200).json(categoriaEditada);
+    await Category.findByIdAndUpdate({ _id: idCategory }, categoryData);
+    const updatedCategory = await Category.findOne({ _id: idCategory });
+    res.status(200).send(updatedCategory); // Enviar el menú actualizado como respuesta
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: "Error al editar la categoría" });
+    res.status(400).send({ msg: "Error al actualizar la categoría" });
   }
 };
 
@@ -74,10 +69,35 @@ const eliminarCategoria = async (req, res) => {
     if (!categoriaEliminada) {
       return res.status(404).json({ mensaje: "Categoría no encontrada" });
     }
+    // Buscar los posts que pertenecen solo a la categoría eliminada
+    const postsAEliminar = await Post.find({ categorias: idCategory });
+    // Recorrer los posts y decidir si eliminar o quitar la categoría
+    for (const post of postsAEliminar) {
+      if (post.categorias.length === 1) {
+        await Post.findByIdAndDelete(post._id);
+      } else {
+        post.categorias.pull(idCategory);
+        await post.save();
+      }
+    }
     res.status(200).json(categoriaEliminada);
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al eliminar la categoría" });
+  }
+};
+
+const updatePostsEstadoMostrar = async (categoryId, mostrarState) => {
+  try {
+    const postsToUpdate = await Post.find({ categorias: categoryId });
+    console.log("Post to update backend", postsToUpdate);
+    for (const post of postsToUpdate) {
+      post.mostrar = mostrarState;
+      await post.save();
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al actualizar el estado mostrar de los posts");
   }
 };
 
@@ -87,4 +107,5 @@ module.exports = {
   obtenerTodasCategorias,
   obtenerCategoriaPorId,
   eliminarCategoria,
+  updatePostsEstadoMostrar,
 };

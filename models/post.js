@@ -32,6 +32,9 @@ const PostSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  active: {
+    type: Boolean,
+  },
   categorias: [
     {
       type: mongoose.Schema.Types.ObjectId,

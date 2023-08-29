@@ -9,6 +9,7 @@ const UserSchema = mongoose.Schema({
   },
   current_password: String,
   role: String,
+  sede: String,
   active: Boolean,
   avatar: String,
 });

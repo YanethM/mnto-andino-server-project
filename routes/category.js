@@ -19,8 +19,14 @@ api.get("/", CategoryController.obtenerTodasCategorias);
 api.get("/:idCategory",CategoryController.obtenerCategoriaPorId);
 
 // Ruta para actualizar una categoría por su ID
-api.put(
+api.patch(
   "/edit/:idCategory",
+  [md_auth.ensureAuth],
+  CategoryController.editarCategoria
+);
+
+api.patch(
+  "/update-posts-show/:idCategory",
   [md_auth.ensureAuth],
   CategoryController.editarCategoria
 );

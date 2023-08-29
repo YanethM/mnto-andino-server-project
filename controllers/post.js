@@ -1,103 +1,74 @@
 const Post = require("../models/post");
 const Categoria = require("../models/category");
+const image = require("../utils/image");
 
-const verificarCategorias = async (categorias) => {
-  if (!categorias || !Array.isArray(categorias)) {
-    throw new Error("Las categorías no son válidas.");
-  }
-
-  // Convertir los identificadores de categorías a objetos ObjectId
-  const categoriasObjectId = categorias.map((id) => ObjectId(id));
-
-  console.log("Categorias:", categoriasObjectId);
-  const categoriasEncontradas = await Categoria.find({
-    _id: { $in: categoriasObjectId },
-  });
-  console.log("Categorias Encontradas:", categoriasEncontradas);
-  console.log("Categorias:", categoriasObjectId.length);
-  // Verifica si todas las categorías proporcionadas existen en la base de datos
-  if (categoriasEncontradas.length !== categoriasObjectId.length) {
-    throw new Error("Alguna de las categorías proporcionadas no existe.");
-  }
-};
-
-// Controlador en el servidor para crear una noticia
-// Controlador en el servidor para crear una noticia
-const crearNoticia = async (req, res) => {
-  // Obtener los datos del payload
-  const {
-    titulo,
-    subtitulo,
-    descripcion,
-    creador,
-    fecha_creacion,
-    imagenes,
-    categorias,
-  } = req.body;
-
-  console.log("ids recibidos de categorías", categorias);
-  // Verificar si las categorías son válidas
-  if (!categorias || !Array.isArray(categorias)) {
-    return res.status(400).json({ error: "Las categorías no son válidas." });
-  }
-
-  const categoriasValidas = await Categoria.find({ _id: { $in: categorias } });
-
-  if (categoriasValidas.length !== categorias.length) {
-    return res
-      .status(400)
-      .json({ error: "Alguna de las categorías proporcionadas no existe." });
-  }
-
-  // Si las categorías son válidas, procede a crear la noticia
-
-  const nuevaNoticia = new Post({
-    titulo,
-    subtitulo,
-    descripcion,
-    creador,
-    fecha_creacion,
-    imagenes,
-    categorias,
-  });
+const createNew = async (req, res) => {
   try {
-    const noticiaGuardada = await nuevaNoticia.save();
-    console.log("Datos noticia guardada", noticiaGuardada);
-    res.status(201).json(noticiaGuardada); // Asegúrate de devolver los datos de la noticia guardada
+    const { categorias, ...postData } = req.body;
+    console.log("Datos de la noticia a crear:", postData);
+    console.log(req.files.imagenes);
+    // Procesar las imágenes si se proporcionan
+    if (req.files.imagenes && Array.isArray(req.files.imagenes)) {
+      const processedImages = req.files.imagenes.map((imagen) => {
+        const imagePath = imagen.path; // Aquí usamos el path de la imagen directamente
+        return {
+          url: image.getImageUrl(imagePath),
+          descripcion: imagen.originalFilename, // Puedes ajustar esto según tu lógica
+        };
+      });
+      postData.imagenes = processedImages;
+    }
+
+    const newPost = new Post({ ...postData });
+    const postStored = await newPost.save();
+    res.status(201).json({
+      _id: postStored._id,
+      titulo: postStored.titulo,
+      subtitulo: postStored.subtitulo,
+      descripcion: postStored.descripcion,
+      creador: postStored.creador,
+      imagenes: postStored.imagenes,
+      fecha_creacion: postStored.fecha_creacion,
+      active: postStored.active,
+      categorias: postStored.categorias,
+    });
+    console.log(postStored);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error al crear la noticia." });
+    res.status(400).json({ msg: "Error al crear la publicación" });
   }
 };
 
+const getAllNews = async (req, res) => {
+  try {
+    const news = await Post.find();
+    res.status(200).json(news);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al obtener las publicaciones" });
+  }
+};
 // Método para editar una noticia existente
 const editarNoticia = async (req, res) => {
+  console.log("Editar noticia", req.params);
+  const { id } = req.params;
+  const postData = req.body;
+  console.log(`id: ${id}`);
+  console.log("Datos de la categoría a actualizar:", postData);
   try {
-    const { id } = req.params;
-    const { titulo, subtitulo, descripcion, imagenes, creador, categorias } =
-      req.body;
-
-    // Verifica las categorías antes de actualizar la noticia
-    await verificarCategorias(categorias);
-
-    const noticiaEditada = await Noticia.findByIdAndUpdate(
-      id,
-      { titulo, subtitulo, descripcion, imagenes, creador, categorias },
-      { new: true }
-    );
-    if (!noticiaEditada) {
-      return res.status(404).json({ mensaje: "Noticia no encontrada" });
-    }
-    res.status(200).json(noticiaEditada);
+    await Post.findByIdAndUpdate({ _id: id }, postData);
+    const updatedPost = await Post.findOne({ _id: id });
+    res.status(200).send(updatedPost); // Enviar el menú actualizado como respuesta
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: "Error al editar la noticia" });
+    res.status(400).send({ msg: "Error al actualizar la noticia" });
   }
 };
+
 // Método para consultar todas las noticias
 const obtenerTodasNoticias = async (req, res) => {
   try {
     const noticias = await Post.find();
+    console.log("Noticias desde controller", noticias);
     res.status(200).json(noticias);
   } catch (error) {
     console.error(error);
@@ -109,7 +80,7 @@ const obtenerTodasNoticias = async (req, res) => {
 const obtenerNoticiaPorId = async (req, res) => {
   try {
     const { id } = req.params;
-    const noticia = await Noticia.findById(id);
+    const noticia = await Post.findById(id);
     if (!noticia) {
       return res.status(404).json({ mensaje: "Noticia no encontrada" });
     }
@@ -120,11 +91,23 @@ const obtenerNoticiaPorId = async (req, res) => {
   }
 };
 
+// Función para obtener los posts asociados con una categoría
+const getPostsAssociatedWithCategory = async (categoryId) => {
+  try {
+    const posts = await Post.find({ categorias: categoryId });
+    console.log(posts);
+    return posts;
+  } catch (error) {
+    console.error("Error al obtener los posts asociados:", error);
+    throw error;
+  }
+};
+
 // Método para eliminar una noticia por su ID
 const eliminarNoticia = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('id a eliminar', id);
+    console.log("id a eliminar", id);
     const noticiaEliminada = await Post.findByIdAndDelete(id);
     if (!noticiaEliminada) {
       return res.status(404).json({ mensaje: "Noticia no encontrada" });
@@ -137,9 +120,11 @@ const eliminarNoticia = async (req, res) => {
 };
 
 module.exports = {
-  crearNoticia,
+  createNew,
+  getAllNews,
   editarNoticia,
   obtenerTodasNoticias,
   obtenerNoticiaPorId,
   eliminarNoticia,
+  getPostsAssociatedWithCategory,
 };

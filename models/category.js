@@ -7,7 +7,7 @@ const CategorySchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  active: { type: Boolean, required: true },
+  active: { type: Boolean},
   created_at: { type: Date, default: Date.now },
 });
 

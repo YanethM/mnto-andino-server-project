@@ -1,6 +1,8 @@
 const jwt = require("../utils/jwt");
 const User = require("../models/user");
 const { JWT_SECRET_KEY } = require("../constants");
+
+
 const ensureAuth = async (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization || !authorization.startsWith("Bearer ")) {

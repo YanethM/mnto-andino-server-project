@@ -1,7 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const image = require("../utils/image");
-const jwt = require("../utils/jwt");
 
 // Obtener datos del usuario autenticado
 async function getMe(req, res) {
