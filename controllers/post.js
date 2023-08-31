@@ -5,12 +5,14 @@ const Categoria = require("../models/category");
 const createNew = async (req, res) => {
   try {
     const { categorias, ...postData } = req.body;
+    console.log(req.files.avatar);
+  
     if (!req.files || !req.files.avatar) {
       return res.status(400).json({ msg: "Error al subir la imagen" });
     } else {
       console.log("Archivo que llega", req.files.avatar);
       const imagePath = req.files.avatar.path; // Usar la propiedad 'path' para obtener la ruta del archivo
-      console.log(imagePath);
+      console.log('imagePath',imagePath);
       postData.avatar = imagePath;
     }
     const postStored = new Post(postData);
@@ -73,7 +75,7 @@ const obtenerTodasNoticias = async (req, res) => {
 // Método para consultar una noticia específica por su ID
 const obtenerNoticiaPorId = async (req, res) => {
   try {
-    console.log('LLegue a la consulta por el id en el back');
+    console.log("LLegue a la consulta por el id en el back");
     const { id } = req.params;
     const noticia = await Post.findById(id);
     console.log(noticia);

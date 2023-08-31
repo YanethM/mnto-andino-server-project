@@ -17,7 +17,10 @@ const PostSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  avatar: String,
+  avatar:
+    {
+      type: String, // Guardaremos la URL de la imagen en la base de datos
+    },
   fecha_creacion: {
     type: Date,
     default: Date.now,
@@ -32,7 +35,6 @@ const PostSchema = mongoose.Schema({
       ref: "Category",
     },
   ],
-
 });
 
 PostSchema.plugin(mongoosePaginate);
