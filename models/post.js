@@ -17,23 +17,14 @@ const PostSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  imagenes: [
-    {
-      url: {
-        type: String,
-        required: true,
-      },
-      descripcion: {
-        type: String,
-      },
-    },
-  ],
+  avatar: String,
   fecha_creacion: {
     type: Date,
     default: Date.now,
   },
   active: {
     type: Boolean,
+    default: true,
   },
   categorias: [
     {
@@ -41,6 +32,7 @@ const PostSchema = mongoose.Schema({
       ref: "Category",
     },
   ],
+
 });
 
 PostSchema.plugin(mongoosePaginate);

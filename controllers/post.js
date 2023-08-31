@@ -1,33 +1,27 @@
 const Post = require("../models/post");
-const Categoria = require("../models/category");
 const image = require("../utils/image");
+const Categoria = require("../models/category");
 
 const createNew = async (req, res) => {
   try {
     const { categorias, ...postData } = req.body;
-    console.log("Datos de la noticia a crear:", postData);
-    console.log(req.files.imagenes);
-    // Procesar las imágenes si se proporcionan
-    if (req.files.imagenes && Array.isArray(req.files.imagenes)) {
-      const processedImages = req.files.imagenes.map((imagen) => {
-        const imagePath = imagen.path; // Aquí usamos el path de la imagen directamente
-        return {
-          url: image.getImageUrl(imagePath),
-          descripcion: imagen.originalFilename, // Puedes ajustar esto según tu lógica
-        };
-      });
-      postData.imagenes = processedImages;
+    if (!req.files || !req.files.avatar) {
+      return res.status(400).json({ msg: "Error al subir la imagen" });
+    } else {
+      console.log("Archivo que llega", req.files.avatar);
+      const imagePath = req.files.avatar.path; // Usar la propiedad 'path' para obtener la ruta del archivo
+      console.log(imagePath);
+      postData.avatar = imagePath;
     }
-
-    const newPost = new Post({ ...postData });
-    const postStored = await newPost.save();
+    const postStored = new Post(postData);
+    await postStored.save();
     res.status(201).json({
       _id: postStored._id,
       titulo: postStored.titulo,
       subtitulo: postStored.subtitulo,
       descripcion: postStored.descripcion,
       creador: postStored.creador,
-      imagenes: postStored.imagenes,
+      avatar: postStored.avatar,
       fecha_creacion: postStored.fecha_creacion,
       active: postStored.active,
       categorias: postStored.categorias,
@@ -79,8 +73,10 @@ const obtenerTodasNoticias = async (req, res) => {
 // Método para consultar una noticia específica por su ID
 const obtenerNoticiaPorId = async (req, res) => {
   try {
+    console.log('LLegue a la consulta por el id en el back');
     const { id } = req.params;
     const noticia = await Post.findById(id);
+    console.log(noticia);
     if (!noticia) {
       return res.status(404).json({ mensaje: "Noticia no encontrada" });
     }
